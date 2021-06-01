@@ -34,7 +34,7 @@ contract AaveTest {
     }
 
     function withdraw(uint amount) public {
-        daiToken.approve(address(this), amount);
+       // daiToken.approve(address(this), amount);
         aaveVault.withdraw(daiAddress, amount, address(this));
     }
 }
