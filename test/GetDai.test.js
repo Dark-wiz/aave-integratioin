@@ -8,7 +8,7 @@ const DAIContractABI = require("../abi/dai.json");
 const erc20ContractAbi = require("../abi/erc20.json");
 
 //dai address from etherum mainnet network
-const unlockedAddress =  "0x767ecb395def19ab8d1b2fcc89b3ddfbed28fd6b";
+const unlockedAddress =  "0x16463c0fdb6ba9618909f5b120ea1581618c1b9e";
 const DAIContractAddress = "0x6b175474e89094c44da98b954eedeac495271d0f";
 
 const DAIContract = new web3.eth.Contract(erc20ContractAbi, DAIContractAddress);
