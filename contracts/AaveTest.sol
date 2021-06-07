@@ -36,7 +36,7 @@ contract AaveTest {
     function withdraw(uint256 amount) public {
         IERC20 aDaiToken = IERC20(aDaiAddress);
         uint aDaiBalance = aDaiToken.balanceOf(address(this));
-        require(aDaiBalance >= amount);
+        require(aDaiBalance >= amount, "balance must be greater");
         lendingPool.withdraw(daiAddress, amount, msg.sender);
     }
 
