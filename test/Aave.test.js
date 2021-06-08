@@ -14,6 +14,9 @@ const dai = new web3.eth.Contract(dai_abi, dai_address);
 const aDai = new web3.eth.Contract(aDai_abi, a_dai_address);
 
 
+const waitTime = (minutes) => new Promise(resolve => setTimeout(resolve, minutes * 60 * 1000));
+
+
 contract("AaveTest", async accounts => {
     let aave;
     beforeEach(async () => {
@@ -61,41 +64,34 @@ contract("AaveTest", async accounts => {
 
         it('check amount deposited', async () => {
             const amount = web3.utils.toWei('50', 'ether');
-            let balance = await web3.eth.getBalance(receiverAddress);
-
-            console.log(amount, "amount to deposit")
-            console.log(balance, 'aave balance');
-
-            console.log(aave.address, 'aave address');
+            console.log(amount, "amount to deposit");
 
             await dai.methods.approve(aave.address, amount).send({from: receiverAddress}); //this gives the contract permission to use funds sent
             let allowanceBalance = await dai.methods.allowance(receiverAddress, aave.address).call(); //owner address first, then receiver address
             console.log(allowanceBalance, 'allowance balance');
             await aave.deposit();
             console.log('deposited...');
-            let expected = web3.utils.toWei('50', 'ether');
-            assert.equal(allowanceBalance, expected);
+            let expected = await aDai.methods.balanceOf(receiverAddress).call();
+            let aDaiBalance = web3.utils.fromWei(expected, 'ether');
+            waitTime(2);
+            console.log(aDaiBalance, "after 2 minutes");
+            assert.equal(aDaiBalance, 50, "balance matches");
         });
 
-        it('check a_token balance', async () => {
-            const amount = await aDai.methods.balanceOf(receiverAddress).call();
-            console.log(amount, 'adai balance');
-            const expected = web3.utils.toWei('50', 'ether');
-            const balance = web3.utils.toWei(amount, 'ether');
-            console.log(balance, 'converted adai balance');
-
-            assert.equal(balance, expected);
-        })
-
         it('withdraw deposited atoken', async () => {
-            const amount = web3.utils.toWei('20', 'ether');
-            await aave.withdraw(amount);
+            const amount = web3.utils.toWei('20', 'ether');            
+            const currentBalance = await aDai.methods.balanceOf(receiverAddress).call();
+            console.log(web3.utils.fromWei(currentBalance, 'ether'), "current balance before withdrawal");
+            await aDai.methods.approve(aave.address, amount).send({from:receiverAddress});
+            let allowanceBalance = await aDai.methods.allowance(receiverAddress, aave.address).call();
+            console.log(web3.utils.fromWei(allowanceBalance, 'ether'), 'allowance balance');
+            await aave.withdraw();
             
             const balance = await aDai.methods.balanceOf(receiverAddress).call();
-            console.log(balance, 'converted adai balance after withdrawal');
-            const expected = web3.utils.toWei('30', 'ether');
-            assert.equal(balance, expected);
-        })
+            console.log(web3.utils.fromWei(balance, 'ether'), 'converted adai balance after withdrawal');
+            // const expected = web3.utils.fromWei('30', 'ether');
+            assert.equal(balance, 30);
+        });
 
         // it('check amount can be borrowed', async () => {            
         //     const amount = web3.utils.toWei('20', 'ether');
